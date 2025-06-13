@@ -1,1 +1,43 @@
+#Menu Principal
+import tkinter as tk
+from tkinter import messagebox
+
+# Ventana principal
+root = tk.Tk()
+root.title("TP Final Hotel - Menú Principal")
+root.geometry("400x300")
+
+# Funciones de botones
+def crear_habitacion():
+    messagebox.showinfo("Crear habitación", "Aquí podrías registrar una nueva habitación.")
+
+def acceder_habitacion():
+    messagebox.showinfo("Acceder habitación", "Aquí podrías gestionar una habitación (check-in/check-out).")
+
+def ver_todas():
+    messagebox.showinfo("Ver habitaciones", "Aquí podrías ver el estado de todas las habitaciones.")
+
+def salir():
+    root.destroy()
+
+# Widgets
+label = tk.Label(root, text="Menú Principal del Hotel", font=("Arial", 16))
+label.pack(pady=20)
+
+btn1 = tk.Button(root, text="1. Crear nueva habitación", width=30, command=crear_habitacion)
+btn1.pack(pady=5)
+
+btn2 = tk.Button(root, text="2. Acceder a una habitación", width=30, command=acceder_habitacion)
+btn2.pack(pady=5)
+
+btn3 = tk.Button(root, text="3. Ver todas las habitaciones", width=30, command=ver_todas)
+btn3.pack(pady=5)
+
+btn4 = tk.Button(root, text="4. Salir", width=30, command=salir)
+btn4.pack(pady=20)
+
+# Ejecutar app
+root.mainloop()
+
+
 

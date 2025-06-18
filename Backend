@@ -105,7 +105,6 @@ def menu_habitacion(hab):
             if len(hab.huespedes) >= hab.capacidad_maxima():
                 print("Ya no se pueden agregar mas huéspedes. ")
                 continue
-            
             nombre = input("Nombre del huésped: ")
             apellido = input("Apellido del huésped: ")
             dni = input("DNI del huésped: ")
@@ -134,9 +133,63 @@ def menu_habitacion(hab):
         else:
             print("Opción no válida.") 
 
-piso = int(input("Ingrese el número de piso: "))
-numero = int(input("Ingrese el número de habitación: "))
-tipo = input("Ingrese el tipo de habitación ('doble' o 'triple'): ")
+class Hotel:
+    def __init__(self):
+        self.habitaciones = []
 
-habitacion = Habitacion(piso, numero, tipo)
-menu_habitacion(habitacion)
+    def agregar_habitacion(self, habitacion):
+        self.habitaciones.append(habitacion)
+
+    def buscar_habitacion(self, numero):
+        for hab in self.habitaciones:
+            if hab.numero == numero:
+                return hab
+        print("Habitación no encontrada.")
+        return None
+
+    def mostrar_todas(self):
+        if not self.habitaciones:
+            print("No hay habitaciones registradas.")
+            return
+        for hab in self.habitaciones:
+            print(f"Habitación {hab.numero} - Piso {hab.piso} - Tipo: {hab.tipo} - Estado: {hab.estado}")
+
+def menu_hotel(hotel):
+    while True:
+        print("\n--- Menú del Hotel ---")
+        print("1. Agregar nueva habitación")
+        print("2. Acceder a una habitación")
+        print("3. Ver todas las habitaciones")
+        print("4. Salir")
+
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            piso = int(input("Número de piso: "))
+            numero = int(input("Número de habitación: "))
+            tipo = input("Tipo de habitación ('doble' o 'triple'): ").lower()
+            if tipo not in ["doble", "triple"]:
+                print("Tipo inválido.")
+                continue
+            hab = Habitacion(piso, numero, tipo)
+            hotel.agregar_habitacion(hab)
+            print("Habitación agregada.")
+
+        elif opcion == "2":
+            numero = int(input("Ingrese el número de habitación: "))
+            hab = hotel.buscar_habitacion(numero)
+            if hab:
+                menu_habitacion(hab)
+
+        elif opcion == "3":
+            hotel.mostrar_todas()
+
+        elif opcion == "4":
+            print("Saliendo del sistema del hotel.")
+            break
+        else:
+            print("Opción no válida.")
+
+
+hotel = Hotel()
+menu_hotel(hotel)

@@ -1,0 +1,179 @@
+from datetime import datetime, time
+
+class Huesped:
+    def __init__(self, nombre, apellido, dni, correo):
+        self.nombre = nombre
+        self.apellido = apellido
+        self.dni = dni
+        self.correo = correo
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido} | DNI: {self.dni} | Email: {self.correo}"
+
+class Habitacion:
+    PRECIOS_BASE = {1: 80, 2: 100, 3: 130}
+
+    def __init__(self, piso, numero, tipo):
+        self.piso = piso
+        self.numero = numero
+        self.tipo = tipo
+        self.estado = "libre"
+        self.huespedes = []
+        self.fecha_ingreso = None
+
+    def capacidad_maxima(self):
+        return 2 if self.tipo == "doble" else 3
+
+    def esta_llena(self):
+        return len(self.huespedes) >= self.capacidad_maxima()
+
+    def agregar_huesped(self, huesped):
+        if self.esta_llena():
+            raise ValueError("Capacidad máxima alcanzada.")
+        self.huespedes.append(huesped)
+
+    def check_in(self):
+        if self.estado == "ocupada":
+            raise Exception("La habitación ya está ocupada.")
+        if not self.huespedes:
+            raise Exception("No hay huéspedes registrados.")
+        self.estado = "ocupada"
+        self.fecha_ingreso = datetime.now()
+
+    def check_out(self):
+        if self.estado != "ocupada":
+            raise Exception("La habitación no está ocupada.")
+        ahora = datetime.now()
+        diferencia = ahora - self.fecha_ingreso
+        noches = diferencia.days
+        hora_limite = time(10, 0)
+
+        if noches == 0 and ahora.time() > hora_limite:
+            noches = 0.5
+        elif noches > 0 and ahora.time() > hora_limite:
+            noches += 0.5
+
+        precio_noche = self.obtener_precio()
+        total = noches * precio_noche
+
+        self.estado = "libre"
+        self.huespedes.clear()
+        self.fecha_ingreso = None
+
+        return total, noches
+
+    def obtener_precio(self):
+        return self.PRECIOS_BASE.get(len(self.huespedes), 0)
+
+    def mostrar_info(self):
+        print(f"\n📌 Habitación {self.numero} - Piso {self.piso} - Tipo: {self.tipo}")
+        print(f"🛏️ Estado: {self.estado}")
+        print("👤 Huéspedes:")
+        if not self.huespedes:
+            print("  - Ninguno")
+        for h in self.huespedes:
+            print(f"  - {h}")
+
+class Hotel:
+    def __init__(self):
+        self.habitaciones = {}
+
+    def agregar_habitacion(self, habitacion):
+        if habitacion.numero in self.habitaciones:
+            raise ValueError("Ya existe una habitación con ese número.")
+        self.habitaciones[habitacion.numero] = habitacion
+
+    def obtener_habitacion(self, numero):
+        return self.habitaciones.get(numero)
+
+    def imprimir_habitaciones(self):
+        if not self.habitaciones:
+            print("⚠️ No hay habitaciones registradas.")
+            return
+        print("\n🏨 Lista de Habitaciones:")
+        for hab in self.habitaciones.values():
+            estado_icono = "✅" if hab.estado == "libre" else "⛔"
+            print(f"  {estado_icono} Habitación {hab.numero} | Piso: {hab.piso} | Tipo: {hab.tipo} | Estado: {hab.estado}")
+
+def menu_principal():
+    hotel = Hotel()
+    while True:
+        print("\n--- 🧾 MENÚ PRINCIPAL ---")
+        hotel.imprimir_habitaciones()
+        print("1. Agregar habitación")
+        print("2. Gestionar habitación")
+        print("3. Salir")
+        opcion = input("Ingrese una opción: ")
+
+        try:
+            if opcion == "1":
+                crear_habitacion(hotel)
+            elif opcion == "2":
+                gestionar_habitacion(hotel)
+            elif opcion == "3":
+                print("👋 Cerrando el sistema. ¡Hasta pronto!")
+                break
+            else:
+                print("❌ Opción inválida.")
+        except Exception as e:
+            print(f"⚠️ Error: {e}")
+
+def crear_habitacion(hotel):
+    try:
+        piso = int(input("Piso: "))
+        numero = int(input("Número de habitación: "))
+        tipo = input("Tipo ('doble' o 'triple'): ").strip().lower()
+        if tipo not in ["doble", "triple"]:
+            raise ValueError("Tipo no válido.")
+        habitacion = Habitacion(piso, numero, tipo)
+        hotel.agregar_habitacion(habitacion)
+        print("✅ Habitación agregada correctamente.")
+    except ValueError as e:
+        print(f"⚠️ Error de entrada: {e}")
+
+def gestionar_habitacion(hotel):
+    try:
+        numero = int(input("Ingrese el número de habitación: "))
+        habitacion = hotel.obtener_habitacion(numero)
+        if not habitacion:
+            print("❌ Habitación no encontrada.")
+            return
+
+        while True:
+            print(f"\n--- MENÚ HABITACIÓN {habitacion.numero} ---")
+            hotel.imprimir_habitaciones()
+            print("1. Agregar huésped")
+            print("2. Check-in")
+            print("3. Check-out")
+            print("4. Ver detalles")
+            print("5. Volver")
+            opcion = input("Seleccione una opción: ")
+
+            if opcion == "1":
+                if habitacion.esta_llena():
+                    print("⚠️ Capacidad máxima alcanzada.")
+                    continue
+                nombre = input("Nombre: ")
+                apellido = input("Apellido: ")
+                dni = input("DNI: ")
+                correo = input("Correo: ")
+                huesped = Huesped(nombre, apellido, dni, correo)
+                habitacion.agregar_huesped(huesped)
+                print("✅ Huésped agregado.")
+            elif opcion == "2":
+                habitacion.check_in()
+                print("🟩 Check-in realizado correctamente.")
+            elif opcion == "3":
+                total, noches = habitacion.check_out()
+                print(f"🧾 Total a pagar por {noches} noches: ${total:.2f}")
+            elif opcion == "4":
+                habitacion.mostrar_info()
+            elif opcion == "5":
+                break
+            else:
+                print("❌ Opción inválida.")
+    except Exception as e:
+        print(f"⚠️ Error: {e}")
+
+if __name__ == "__main__":
+    menu_principal()

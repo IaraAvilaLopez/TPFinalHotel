@@ -11,7 +11,8 @@ class Huesped:
         return f"{self.nombre} {self.apellido} | DNI: {self.dni} | Email: {self.correo}"
 
 class Habitacion:
-    PRECIOS_BASE = {1: 80, 2: 100, 3: 130}
+    PRECIO_BASE = 100000  
+    MULTIPLICADORES = {1: 0.8, 2: 1.0, 3: 1.3}
 
     def __init__(self, piso, numero, tipo):
         self.piso = piso
@@ -63,12 +64,14 @@ class Habitacion:
         return total, noches
 
     def obtener_precio(self):
-        return self.PRECIOS_BASE.get(len(self.huespedes), 0)
+        cantidad = len(self.huespedes)
+        multiplicador = self.MULTIPLICADORES.get(cantidad, 0)
+        return self.PRECIO_BASE * multiplicador
 
     def mostrar_info(self):
-        print(f"\n📌 Habitación {self.numero} - Piso {self.piso} - Tipo: {self.tipo}")
-        print(f"🛏️ Estado: {self.estado}")
-        print("👤 Huéspedes:")
+        print(f"\n Habitación {self.numero} - Piso {self.piso} - Tipo: {self.tipo}")
+        print(f" Estado: {self.estado}")
+        print(" Huéspedes:")
         if not self.huespedes:
             print("  - Ninguno")
         for h in self.huespedes:
@@ -88,7 +91,7 @@ class Hotel:
 
     def imprimir_habitaciones(self):
         if not self.habitaciones:
-            print("⚠️ No hay habitaciones registradas.")
+            print("⚠️  No hay habitaciones registradas.")
             return
         print("\n🏨 Lista de Habitaciones:")
         for hab in self.habitaciones.values():
@@ -111,12 +114,12 @@ def menu_principal():
             elif opcion == "2":
                 gestionar_habitacion(hotel)
             elif opcion == "3":
-                print("👋 Cerrando el sistema. ¡Hasta pronto!")
+                print("Cerrando el sistema. ¡Hasta pronto!")
                 break
             else:
                 print("❌ Opción inválida.")
         except Exception as e:
-            print(f"⚠️ Error: {e}")
+            print(f" Error: {e}")
 
 def crear_habitacion(hotel):
     try:
@@ -129,7 +132,7 @@ def crear_habitacion(hotel):
         hotel.agregar_habitacion(habitacion)
         print("✅ Habitación agregada correctamente.")
     except ValueError as e:
-        print(f"⚠️ Error de entrada: {e}")
+        print(f" Error de entrada: {e}")
 
 def gestionar_habitacion(hotel):
     try:
@@ -173,7 +176,7 @@ def gestionar_habitacion(hotel):
             else:
                 print("❌ Opción inválida.")
     except Exception as e:
-        print(f"⚠️ Error: {e}")
+        print(f" Error: {e}")
 
 if __name__ == "__main__":
     menu_principal()

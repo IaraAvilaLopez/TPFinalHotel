@@ -71,11 +71,13 @@ class Habitacion:
     def mostrar_info(self):
         print(f"\n Habitación {self.numero} - Piso {self.piso} - Tipo: {self.tipo}")
         print(f" Estado: {self.estado}")
+        print(f" Capacidad máxima: {self.capacidad_maxima()}")
         print(" Huéspedes:")
         if not self.huespedes:
             print("  - Ninguno")
         for h in self.huespedes:
             print(f"  - {h}")
+        print("-" * 40)
 
 class Hotel:
     def __init__(self):
@@ -89,23 +91,40 @@ class Hotel:
     def obtener_habitacion(self, numero):
         return self.habitaciones.get(numero)
 
+    def eliminar_habitacion(self, numero):
+        if numero not in self.habitaciones:
+            raise ValueError("No existe esa habitación.")
+        del self.habitaciones[numero]
+
     def imprimir_habitaciones(self):
         if not self.habitaciones:
             print("⚠️  No hay habitaciones registradas.")
             return
         print("\n🏨 Lista de Habitaciones:")
-        for hab in self.habitaciones.values():
+        for hab in sorted(self.habitaciones.values(), key=lambda h: h.numero):
             estado_icono = "✅" if hab.estado == "libre" else "⛔"
             print(f"  {estado_icono} Habitación {hab.numero} | Piso: {hab.piso} | Tipo: {hab.tipo} | Estado: {hab.estado}")
 
 def menu_principal():
     hotel = Hotel()
+
+    # Precargar habitaciones: 3 pisos, cada uno con 2 dobles y 1 triple
+    numero_base = 100
+    for piso in range(1, 4):  # pisos 1, 2 y 3
+        numero = piso * numero_base
+        # 2 habitaciones dobles
+        for i in range(2):
+            hotel.agregar_habitacion(Habitacion(piso, numero + i + 1, "doble"))
+        # 1 habitación triple
+        hotel.agregar_habitacion(Habitacion(piso, numero + 11, "triple"))
+
     while True:
         print("\n--- 🧾 MENÚ PRINCIPAL ---")
         hotel.imprimir_habitaciones()
         print("1. Agregar habitación")
         print("2. Gestionar habitación")
-        print("3. Salir")
+        print("3. Eliminar habitación")
+        print("4. Salir")
         opcion = input("Ingrese una opción: ")
 
         try:
@@ -114,6 +133,8 @@ def menu_principal():
             elif opcion == "2":
                 gestionar_habitacion(hotel)
             elif opcion == "3":
+                eliminar_habitacion(hotel)
+            elif opcion == "4":
                 print("Cerrando el sistema. ¡Hasta pronto!")
                 break
             else:
@@ -144,7 +165,7 @@ def gestionar_habitacion(hotel):
 
         while True:
             print(f"\n--- MENÚ HABITACIÓN {habitacion.numero} ---")
-            hotel.imprimir_habitaciones()
+            habitacion.mostrar_info()
             print("1. Agregar huésped")
             print("2. Check-in")
             print("3. Check-out")
@@ -178,5 +199,22 @@ def gestionar_habitacion(hotel):
     except Exception as e:
         print(f" Error: {e}")
 
+def eliminar_habitacion(hotel):
+    try:
+        numero = int(input("Ingrese el número de habitación a eliminar: "))
+        habitacion = hotel.obtener_habitacion(numero)
+        if not habitacion:
+            print("❌ Habitación no encontrada.")
+            return
+        confirmar = input(f"¿Eliminar la habitación {numero}? (s/n): ").strip().lower()
+        if confirmar == "s":
+            hotel.eliminar_habitacion(numero)
+            print(f"✅ Habitación {numero} eliminada.")
+        else:
+            print("❎ Eliminación cancelada.")
+    except Exception as e:
+        print(f" Error: {e}")
+
 if __name__ == "__main__":
     menu_principal()
+5
